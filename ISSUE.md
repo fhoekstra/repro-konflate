@@ -6,6 +6,9 @@ When a parent Flux Kustomization uses `spec.patches` to inject `postBuild.substi
 
 The same failure occurs in **konflate**, because konflate always renders PRs with `orchestrator.RenderTrees`, which enables changed-only mode internally.
 
+Upstream flate fixed a similar issue in https://github.com/home-operations/flate/issues/418
+I would also be happy with a `fullRenderBothBranches` option if that would solve this, if that is simpler than making it work in changed-only mode.
+
 ## Reproduction
 
 > Use a fresh `--cache-dir` for each run. flate caches rendered sources across invocations, and a cached `cluster-settings` render can mask the failure on the failing branch.
@@ -48,11 +51,9 @@ The duplicate keys appear because `READONLY_USER` and `GUEST_USER` expanded to e
 
 The leaf Kustomization manifest (`clusters/app/ks.yaml`) does not itself declare `postBuild.substituteFrom`. The reference is added at render time by the parent `cluster-apps` Kustomization patch. flate's changed-only filter builds the keep set before the parent patch is applied, so it never sees the hard `substituteFrom` edge from the leaf to `cluster-settings`. Consequently the `cluster-settings` Kustomization is not kept, and the ConfigMap is not materialized before the leaf reconciles.
 
-## Workaround
+## Fix suggestion
 
-There is no clean workaround for a PR that introduces the fix, because konflate renders **both** sides changed-only and the base side will still lack the dependency.
-
-A partial mitigation is to land an explicit `postBuild.substituteFrom` reference on the base branch first; once it is present on both sides of future PRs, the producer will be included. This does not fix the underlying changed-only behaviour for parent-injected `substituteFrom`.
+Perhaps we could expose a config option in Konflate to do a full double render (just like `flate build`) of both branches, instead of changed-only mode, so the referenced substitute buildFrom always materializes.
 
 ## Environment
 

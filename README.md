@@ -7,7 +7,7 @@ Minimal repro for the issue described in [ISSUE.md](./ISSUE.md).
 * `main` — baseline
 * `feature/repro-failing` — parent patch injects `substituteFrom`; leaf KS has no explicit reference
 
-## Reproduce
+## Reproduce locally
 
 ```bash
 git checkout feature/repro-failing

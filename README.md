@@ -1,11 +1,11 @@
 # konflate / flate changed-only `substituteFrom` reproduction
 
-Minimal repro for the issue described in [ISSUE.md](./ISSUE.md).
+Minimal repro for the issue described in [ISSUE.md](./ISSUE.md). Hosted at https://konflate-repro.kubes.cloud/
 
 ## Branches
 
-* `main` — baseline
-* `feature/repro-failing` — parent patch injects `substituteFrom`; leaf KS has no explicit reference
+- `main` — baseline
+- `feature/repro-failing` — parent patch injects `substituteFrom`; leaf KS has no explicit reference
 
 ## Reproduce locally
 

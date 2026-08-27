@@ -26,10 +26,12 @@ clusters/app/resources/consumer.yaml  # uses variables from cluster-settings
 
 See this repo for the actual files. There are two branches:
 
-* `main` — baseline
-* `feature/repro-failing` — only `consumer.yaml` is changed; the leaf KS has no explicit `substituteFrom`
+- `main` — baseline
+- `feature/repro-failing` — only `consumer.yaml` is changed; the leaf KS has no explicit `substituteFrom`
 
 ### Reproduce
+
+Check out https://konflate-repro.kubes.cloud/ or to check it locally:
 
 ```bash
 git checkout feature/repro-failing
@@ -57,5 +59,5 @@ Perhaps we could expose a config option in Konflate to do a full double render (
 
 ## Environment
 
-* flate version: `0.6.0`
-* konflate uses the same flate version and calls `orchestrator.RenderTrees`, so the failure reproduces there as well.
+- flate version: `0.6.0`
+- konflate uses the same flate version and calls `orchestrator.RenderTrees`, so the failure reproduces there as well.

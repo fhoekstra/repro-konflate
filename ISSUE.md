@@ -21,13 +21,12 @@ clusters/app/ks.yaml       # leaf Kustomization; substituteFrom is added by the 
 clusters/app/resources/consumer.yaml  # uses variables from cluster-settings
 ```
 
-See this repo for the actual files. There are three branches:
+See this repo for the actual files. There are two branches:
 
 * `main` — baseline
 * `feature/repro-failing` — only `consumer.yaml` is changed; the leaf KS has no explicit `substituteFrom`
-* `feature/repro-working` — same change plus an explicit `postBuild.substituteFrom` in the leaf KS
 
-### Failing case
+### Reproduce
 
 ```bash
 git checkout feature/repro-failing
@@ -45,23 +44,15 @@ flate build ks --path flux/root --base main --cache-dir /tmp/flate-repro-cache -
 
 The duplicate keys appear because `READONLY_USER` and `GUEST_USER` expanded to empty strings after the `cluster-settings` ConfigMap was not available.
 
-### Working case
-
-```bash
-git checkout feature/repro-working
-rm -rf /tmp/flate-repro-cache
-flate build ks --path flux/root --base main --cache-dir /tmp/flate-repro-cache -o yaml
-```
-
-This succeeds and produces the correctly substituted `consumer` ConfigMap.
-
 ## Root cause
 
 The leaf Kustomization manifest (`clusters/app/ks.yaml`) does not itself declare `postBuild.substituteFrom`. The reference is added at render time by the parent `cluster-apps` Kustomization patch. flate's changed-only filter builds the keep set before the parent patch is applied, so it never sees the hard `substituteFrom` edge from the leaf to `cluster-settings`. Consequently the `cluster-settings` Kustomization is not kept, and the ConfigMap is not materialized before the leaf reconciles.
 
 ## Workaround
 
-Add the `postBuild.substituteFrom` reference directly to the leaf Kustomization manifest (even if the parent patch also adds it). This makes the dependency visible to the changed-only filter, which then pulls the producer into the render.
+There is no clean workaround for a PR that introduces the fix, because konflate renders **both** sides changed-only and the base side will still lack the dependency.
+
+A partial mitigation is to land an explicit `postBuild.substituteFrom` reference on the base branch first; once it is present on both sides of future PRs, the producer will be included. This does not fix the underlying changed-only behaviour for parent-injected `substituteFrom`.
 
 ## Environment
 

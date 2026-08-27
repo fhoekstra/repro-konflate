@@ -6,20 +6,17 @@ Minimal repro for the issue described in [ISSUE.md](./ISSUE.md).
 
 * `main` — baseline
 * `feature/repro-failing` — parent patch injects `substituteFrom`; leaf KS has no explicit reference
-* `feature/repro-working` — leaf KS explicitly declares `postBuild.substituteFrom`
 
 ## Reproduce
 
 ```bash
-# Failing case
 git checkout feature/repro-failing
-rm -rf /tmp/flate-repro-cache
-flate build ks --path flux/root --base main --cache-dir /tmp/flate-repro-cache -o yaml
-
-# Working case
-git checkout feature/repro-working
 rm -rf /tmp/flate-repro-cache
 flate build ks --path flux/root --base main --cache-dir /tmp/flate-repro-cache -o yaml
 ```
 
-The failing case exits non-zero with duplicate `/networks/ip`, `/password`, and `/profile` mapping keys because `READONLY_USER` and `GUEST_USER` expand to empty strings in changed-only mode.
+This exits non-zero with duplicate `/networks/ip`, `/password`, and `/profile` mapping keys because `READONLY_USER` and `GUEST_USER` expand to empty strings in changed-only mode.
+
+## konflate note
+
+This command renders only one side. **konflate** uses `orchestrator.RenderTrees`, which renders both the PR head and the merge-base in changed-only mode. The same failure reproduces there because the dependency edge is injected by a parent patch and is not visible to flate's changed-only keep-set builder.

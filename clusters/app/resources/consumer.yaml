@@ -16,3 +16,5 @@ data:
   ${GUEST_USER}/networks/ip: "::/0"
   ${GUEST_USER}/profile: guest
   ${GUEST_USER}/password: ""
+
+changed-key: value

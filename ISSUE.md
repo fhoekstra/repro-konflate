@@ -8,6 +8,8 @@ The same failure occurs in **konflate**, because konflate always renders PRs wit
 
 ## Reproduction
 
+> Use a fresh `--cache-dir` for each run. flate caches rendered sources across invocations, and a cached `cluster-settings` render can mask the failure on the failing branch.
+
 Repository layout:
 
 ```text
@@ -29,7 +31,8 @@ See this repo for the actual files. There are three branches:
 
 ```bash
 git checkout feature/repro-failing
-flate build ks --path flux/root --base main -o yaml
+rm -rf /tmp/flate-repro-cache
+flate build ks --path flux/root --base main --cache-dir /tmp/flate-repro-cache -o yaml
 ```
 
 **Expected:** the leaf `consumer` Kustomization renders successfully, substituting `READONLY_USER` and `GUEST_USER` from the `cluster-settings` ConfigMap.
@@ -46,7 +49,8 @@ The duplicate keys appear because `READONLY_USER` and `GUEST_USER` expanded to e
 
 ```bash
 git checkout feature/repro-working
-flate build ks --path flux/root --base main -o yaml
+rm -rf /tmp/flate-repro-cache
+flate build ks --path flux/root --base main --cache-dir /tmp/flate-repro-cache -o yaml
 ```
 
 This succeeds and produces the correctly substituted `consumer` ConfigMap.
